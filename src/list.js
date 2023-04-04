@@ -24,11 +24,13 @@ class Overall {
     this.tasks.forEach(({
       description, completed,
     }, i) => {
+      const ul = document.createElement('li');
+      const checkbox = document.createElement('input');
+      const describe = document.createElement('p');
+      const more = moreBtn();
       this.tasks[i].index = this.tasks.length - i;
       localStorage.setItem('tasks', JSON.stringify(this.tasks));
-      const ul = document.createElement('li');
       ul.className = 'to-do-item';
-      const checkbox = document.createElement('input');
       checkbox.setAttribute('type', 'checkbox');
       checkbox.checked = completed;
       checkbox.addEventListener('change', () => {
@@ -40,13 +42,11 @@ class Overall {
         localStorage.setItem('tasks', JSON.stringify(this.tasks));
         this.displayTasks();
       });
-      const describe = document.createElement('p');
       describe.textContent = description;
       if (completed) {
         describe.className = 'strike';
       }
       describe.ondblclick = this.more.bind(this);
-      const more = moreBtn();
       more.onclick = this.more.bind(this);
       ul.appendChild(checkbox);
       ul.appendChild(describe);
@@ -74,9 +74,11 @@ class Overall {
     this.displayTasks();
   }
 
-  more(e) {
-    const parent = e.target.parentNode;
-    const target = parent.childNodes[1];
+  more({
+    target,
+  }) {
+    const parent = target.parentNode;
+    const targetEle = parent.childNodes[1];
     const list = Array.from(this.listContainer.childNodes);
     let targetIndex;
     list.forEach((each, index) => {
@@ -84,7 +86,7 @@ class Overall {
         targetIndex = index;
       }
     });
-    this.edit(target, targetIndex);
+    this.edit(targetEle, targetIndex);
   }
 
   edit(target, index) {
@@ -98,17 +100,21 @@ class Overall {
     const trash = document.createElement('i');
     trash.className = 'fa fa-trash trash';
     more.parentNode.replaceChild(trash, more);
-    trash.addEventListener('click', (e) => {
+    trash.addEventListener('click', ({
+      target,
+    }) => {
       const tasks = document.querySelectorAll('li');
       tasks.forEach((task, index) => {
-        if (task === e.target.parentNode) {
+        if (task === target.parentNode) {
           this.remove(this.tasks.length - index);
         }
       });
     });
 
-    editInput.addEventListener('keyup', (e) => {
-      if (e.key === 'Enter') {
+    editInput.addEventListener('keyup', ({
+      key,
+    }) => {
+      if (key === 'Enter') {
         text = editInput.value;
         this.tasks[index].description = text;
         localStorage.setItem('tasks', JSON.stringify(this.tasks));
@@ -125,9 +131,11 @@ class Overall {
     this.form.addEventListener('submit', (event) => {
       event.preventDefault();
       const input = this.form.lastElementChild;
-      input.addEventListener('keyup', (e) => {
+      input.addEventListener('keyup', ({
+        key,
+      }) => {
         const text = input.value;
-        if (e.key === 'Enter' && text !== '') {
+        if (key === 'Enter' && text !== '') {
           this.add(text);
           this.form.reset();
         }
